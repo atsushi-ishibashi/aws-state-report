@@ -1,0 +1,8 @@
+package: github.com/atsushi-ishibashi/aws-state-report
+import:
+- package: github.com/jung-kurt/gofpdf
+  version: ~1.0.0
+- package: github.com/aws/aws-sdk-go
+  version: ~1.10.39
+- package: github.com/urfave/cli
+  version: ~1.20.0

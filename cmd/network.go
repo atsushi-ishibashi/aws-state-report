@@ -43,8 +43,10 @@ type Network struct {
 }
 
 func (nt *Network) recursiveConstruct() error {
-	nt.constructVpcs().constructRouteTables().constructSubnets().associateRouteTableSubnet()
-	fmt.Printf("%#v\n", nt.Vpcs)
+	nt.constructVpcs().
+		constructRouteTables().
+		constructSubnets().
+		associateRouteTableSubnet()
 	nt.convertPdf()
 	return nt.flattenErrs()
 }

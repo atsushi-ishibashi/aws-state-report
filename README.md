@@ -1,5 +1,5 @@
 # aws-state-report
-aws-state-report export infrastructure in aws to pdf file.
+aws-state-report export infrastructure in aws to excel file.
 
 ## Usage
 ### network

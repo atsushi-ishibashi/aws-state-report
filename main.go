@@ -24,9 +24,11 @@ func main() {
 	}
 
 	networkCommand := cmd.NewNetworkCommand()
+	iamCommand := cmd.NewIAMCommand()
 
 	app.Commands = []cli.Command{
 		networkCommand,
+		iamCommand,
 	}
 	app.Run(os.Args)
 

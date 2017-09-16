@@ -6,3 +6,5 @@ import:
   version: ~1.10.39
 - package: github.com/urfave/cli
   version: ~1.20.0
+- package: github.com/tealeg/xlsx
+  version: ~1.0.3

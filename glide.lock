@@ -1,8 +1,8 @@
-hash: 98b105e22e3ea8359785966b31cf53451bb0d95429ff3a681913a6fa3b00a783
-updated: 2017-09-07T20:05:53.296850197+09:00
+hash: 3e5304fa084c9c990314037bb8c23d743781426fdf650751674c72825b474f6a
+updated: 2017-09-08T16:01:21.136765012+09:00
 imports:
 - name: github.com/aws/aws-sdk-go
-  version: 452caf156d7a643d59e81af90f09a2f9814f2833
+  version: fa78289ae88a6b6a59e326885edc00612ed265f3
   subpackages:
   - aws
   - aws/awserr
@@ -35,10 +35,8 @@ imports:
   version: bd40a432e4c76585ef6b72d3fd96fb9b6dc7b68d
 - name: github.com/jung-kurt/gofpdf
   version: 14c1db30737a138f8d9797cffea58783892b2fae
-- name: github.com/rakyll/statik
-  version: fd36b3595eb2ec8da4b8153b107f7ea08504899d
-  subpackages:
-  - fs
+- name: github.com/tealeg/xlsx
+  version: 8be35264fa75a1bbe954ce51eba04f273e2c59e5
 - name: github.com/urfave/cli
   version: cfb38830724cc34fedffe9a2a29fb54fa9169cd1
 testImports: []

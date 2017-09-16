@@ -8,6 +8,7 @@ import (
 	"github.com/atsushi-ishibashi/aws-state-report/util"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/jung-kurt/gofpdf"
+	"github.com/tealeg/xlsx"
 	"github.com/urfave/cli"
 )
 
@@ -15,7 +16,17 @@ func NewNetworkCommand() cli.Command {
 	return cli.Command{
 		Name:  "network",
 		Usage: "export vpcs, route tables and subnets information",
-		Flags: []cli.Flag{},
+		Flags: []cli.Flag{
+			cli.StringFlag{
+				Name:  "src",
+				Usage: "file name to export",
+				Value: "network",
+			},
+			cli.BoolFlag{
+				Name:  "pdf-mode",
+				Usage: "output in pdf file.",
+			},
+		},
 		Action: func(c *cli.Context) error {
 			if err := util.ConfigAWS(c); err != nil {
 				return util.ErrorRed(err.Error())
@@ -30,6 +41,11 @@ func NewNetworkCommand() cli.Command {
 			}
 			if err := ntw.recursiveConstruct(); err != nil {
 				return util.ErrorRed(err.Error())
+			}
+			if c.Bool("pdf-mode") {
+				ntw.convertPdf()
+			} else {
+				ntw.convertXlsx(c.String("src"))
 			}
 			return nil
 		},
@@ -47,7 +63,6 @@ func (nt *Network) recursiveConstruct() error {
 		constructRouteTables().
 		constructSubnets().
 		associateRouteTableSubnet()
-	nt.convertPdf()
 	return nt.flattenErrs()
 }
 
@@ -95,6 +110,79 @@ func (nt *Network) associateRouteTableSubnet() *Network {
 		}
 	}
 	return nt
+}
+
+func (nt *Network) convertXlsx(filename string) {
+	file := xlsx.NewFile()
+	for _, v := range nt.Vpcs {
+		sheet, err := file.AddSheet(v.TagName)
+		if err != nil {
+			util.PrintlnRed(err.Error())
+			continue
+		}
+		currentRow := 0
+		headCell := sheet.Cell(currentRow, 0)
+		headCell.Value = fmt.Sprintf("%s  %s", v.TagName, v.CidrBlock)
+		headCell.Merge(3, 0)
+		headCell.SetStyle(borderWithAlign("lrtb", true))
+		currentRow++
+		for _, rt := range v.RouteTables {
+			rtCell := sheet.Cell(currentRow, 0)
+			rtCell.Value = fmt.Sprintf("Route Table: %s", rt.TagName)
+			rtCell.Merge(1, 0)
+			rtCell.SetStyle(borderWithAlign("lrtb", true))
+			snCell := sheet.Cell(currentRow, 2)
+			snCell.Value = "Association Subnets"
+			snCell.Merge(1, 0)
+			snCell.SetStyle(borderWithAlign("lrtb", true))
+			currentRow++
+			var rtNo int
+			for _, rtr := range rt.Routes {
+				sheet.Cell(currentRow+rtNo, 0).Value = rtr.DestinationCidrBlock
+				sheet.Cell(currentRow+rtNo, 0).SetStyle(borderWithAlign("l", false))
+				sheet.Cell(currentRow+rtNo, 1).Value = rtr.Router
+				sheet.Cell(currentRow+rtNo, 1).SetStyle(borderWithAlign("r", false))
+				rtNo++
+			}
+			var snNo int
+			for _, sn := range v.Subnets {
+				if sn.AssociatedRouteTable == rt {
+					sheet.Cell(currentRow+snNo, 2).Value = sn.TagName
+					sheet.Cell(currentRow+snNo, 2).SetStyle(borderWithAlign("l", false))
+					sheet.Cell(currentRow+snNo, 3).Value = sn.CidrBlock
+					sheet.Cell(currentRow+snNo, 3).SetStyle(borderWithAlign("r", false))
+					snNo++
+				}
+			}
+			maxNo := int(math.Max(float64(rtNo), float64(snNo)))
+			for i := 0; i < maxNo; i++ {
+				sheet.Cell(currentRow+i, 0).SetStyle(borderWithAlign("l", false))
+				sheet.Cell(currentRow+i, 3).SetStyle(borderWithAlign("r", false))
+			}
+			currentRow += maxNo
+		}
+		sheet.Cell(currentRow, 0).SetStyle(borderWithAlign("t", false))
+		sheet.Cell(currentRow, 1).SetStyle(borderWithAlign("t", false))
+		noaSnCell := sheet.Cell(currentRow, 2)
+		noaSnCell.Value = "No Association Subnets"
+		noaSnCell.Merge(1, 0)
+		noaSnCell.SetStyle(borderWithAlign("lrtb", true))
+		currentRow++
+		for _, sn := range v.Subnets {
+			if sn.AssociatedRouteTable == nil {
+				sheet.Cell(currentRow, 2).Value = sn.TagName
+				sheet.Cell(currentRow, 2).SetStyle(borderWithAlign("l", false))
+				sheet.Cell(currentRow, 3).Value = sn.CidrBlock
+				sheet.Cell(currentRow, 3).SetStyle(borderWithAlign("r", false))
+				currentRow++
+			}
+		}
+		sheet.Cell(currentRow, 2).SetStyle(borderWithAlign("t", false))
+		sheet.Cell(currentRow, 3).SetStyle(borderWithAlign("t", false))
+	}
+	if err := file.Save(fmt.Sprintf("./%s.xlsx", filename)); err != nil {
+		nt.stackError(err)
+	}
 }
 
 func (nt *Network) convertPdf() {

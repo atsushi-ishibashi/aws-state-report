@@ -28,4 +28,19 @@ OPTIONS:
 
 Examples:
   $ aws-state-report --awsconf default iam
-``` 
+```
+### sg
+```
+$ aws-state-report sg --help
+NAME:
+  aws-state-report sg - export security groups, network interfaces, instaces and relation among them.
+
+USAGE:
+  aws-state-report sg [command options] [arguments...]
+
+OPTIONS:
+  --src value  file name to export (default: "sg")
+
+Examples:
+  $ aws-state-report --awsconf default sg
+```

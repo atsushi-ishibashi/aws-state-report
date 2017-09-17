@@ -25,22 +25,12 @@ func main() {
 
 	networkCommand := cmd.NewNetworkCommand()
 	iamCommand := cmd.NewIAMCommand()
+	sgCommand := cmd.NewSGCommand()
 
 	app.Commands = []cli.Command{
 		networkCommand,
 		iamCommand,
+		sgCommand,
 	}
 	app.Run(os.Args)
-
-	// pdf := gofpdf.New("P", "mm", "A4", "")
-	// pdf.AddPage()
-	// pdf.SetFont("Arial", "B", 16)
-	// pdf.Cell(40, 50, "Hello World!")
-	// pdf.Image("./images/ec2.png", 10, 10, 30, 0, false, "", 0, "")
-	// pdf.Text(50, 20, "ec2.png")
-	// fileStr := "./basic.pdf"
-	// err := pdf.OutputFileAndClose(fileStr)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
 }

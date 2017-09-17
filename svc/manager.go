@@ -12,6 +12,7 @@ import (
 type Manager struct {
 	*EC2Client
 	*IAMClient
+	*SGClient
 }
 
 func NewManager() (*Manager, error) {
@@ -23,5 +24,6 @@ func NewManager() (*Manager, error) {
 	m := &Manager{}
 	m.EC2Client = &EC2Client{EC2: ec2.New(sess, &aws.Config{Region: aws.String(awsregion)})}
 	m.IAMClient = &IAMClient{IAM: iam.New(sess, &aws.Config{Region: aws.String(awsregion)})}
+	m.SGClient = &SGClient{EC2: ec2.New(sess, &aws.Config{Region: aws.String(awsregion)})}
 	return m, nil
 }
